@@ -3,6 +3,8 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./utils/db.js');
 const scanRoutes = require('./routes/scanRoutes.js');
+const historyRoutes = require('./routes/historyRoutes.js')
+const offerRoutes = require('./routes/offerRoutes');  // Import offer routes
 const path = require('path');
 
 dotenv.config();
@@ -17,6 +19,8 @@ app.use(express.urlencoded({ extended: false }));
 
 // Routes
 app.use('/api/scan', scanRoutes);
+app.use('/api/',historyRoutes);
+app.use('/api', offerRoutes);
 
 connectDB();
 // Start server
