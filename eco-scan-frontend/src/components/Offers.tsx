@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tag, ArrowRight, Leaf } from 'lucide-react';
 
 interface Offer {
@@ -11,32 +11,61 @@ interface Offer {
 }
 
 export default function Offers() {
-  const offers: Offer[] = [
+  const [offers, setOffers] = useState<Offer[]>([
     {
       id: 1,
       title: "Eco-friendly Store Discount",
       description: "Get 20% off on sustainable fashion items",
       pointsCost: 500,
-      carbonScore: -25.5,
-      discount: "20% OFF"
+      carbonScore: 0, // Placeholder for dynamic data
+      discount: "20% OFF",
     },
     {
       id: 2,
       title: "Recycling Bonus",
       description: "Double points on your next recycled item scan",
       pointsCost: 300,
-      carbonScore: -15.2,
-      discount: "2X POINTS"
+      carbonScore: 0, // Placeholder for dynamic data
+      discount: "2X POINTS",
     },
     {
       id: 3,
       title: "Premium Brand Voucher",
       description: "₹1000 off on sustainable premium brands",
       pointsCost: 1000,
-      carbonScore: -50.8,
-      discount: "₹1000 OFF"
-    }
-  ];
+      carbonScore: 0, // Placeholder for dynamic data
+      discount: "₹1000 OFF",
+    },
+  ]);
+
+  useEffect(() => {
+    const fetchOfferData = async () => {
+      try {
+        const response = await fetch(`http://localhost:5001/api/offers`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch offer data');
+        }
+
+        const fetchedData = await response.json();
+
+        // Update offers array with fetched data
+        const updatedOffers = offers.map((offer, index) => {
+          const fetchedOffer = fetchedData[index]; // Assuming the backend returns data in the same order
+          return {
+            ...offer,
+            carbonScore: fetchedOffer.carbonSaved || offer.carbonScore, // Update carbonScore
+            pointsCost: fetchedOffer.rewardPoints || offer.pointsCost, // Update pointsCost
+          };
+        });
+
+        setOffers(updatedOffers);
+      } catch (error:any) {
+        console.error('Error fetching offer data:', error.message);
+      }
+    };
+
+    fetchOfferData();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -59,9 +88,9 @@ export default function Offers() {
                   {offer.discount}
                 </span>
               </div>
-              
+
               <p className="mt-2 text-gray-600">{offer.description}</p>
-              
+
               <div className="mt-4 space-y-3">
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center space-x-1 text-emerald-700">
@@ -72,7 +101,7 @@ export default function Offers() {
                     {offer.carbonScore} kg CO₂
                   </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between border-t pt-3">
                   <span className="text-sm text-gray-500">
                     {offer.pointsCost} points required

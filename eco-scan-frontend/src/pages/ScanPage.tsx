@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import ImageUploader from '../components/ImageUploader';
 import ItemDetails from '../components/ItemDetails';
 
@@ -13,20 +13,44 @@ interface ScanResult {
 
 export default function ScanPage() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleImageUpload = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      setScanResult({
-        name: "Cotton T-Shirt",
-        carbonScore: 2.5,
-        waterUsage: 2700,
-        recyclable: true,
-        ecoPoints: 50,
-        imageUrl: reader.result as string
+  const handleImageUpload = async (file: File) => {
+    setLoading(true);
+
+    try {
+      // Prepare the form data
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Send the image to the API
+      const response = await fetch('http://localhost:5001/api/scan', {
+        method: 'POST',
+        body: formData,
       });
-    };
-    reader.readAsDataURL(file);
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image and fetch scan results');
+      }
+
+      // Parse the response
+      const data = await response.json();
+
+      // Update the scan result
+      setScanResult({
+        name: data.name || 'Unknown Item',
+        carbonScore: data.carbonScore || 0,
+        waterUsage: data.waterUsage || 0,
+        recyclable: data.recyclable || false,
+        ecoPoints: data.ecoPoints || 0,
+        imageUrl: data.imageUrl || URL.createObjectURL(file), // Use uploaded image URL
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to fetch scan results. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -36,6 +60,7 @@ export default function ScanPage() {
           Scan Your Clothing
         </h2>
         <ImageUploader onImageUpload={handleImageUpload} />
+        {loading && <p className="text-blue-500 mt-4">Uploading image...</p>}
       </section>
 
       {scanResult && (

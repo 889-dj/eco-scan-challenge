@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { History, TrendingDown, Coins, Award } from 'lucide-react';
 
 interface ScanHistoryItem {
@@ -12,42 +12,53 @@ interface ScanHistoryItem {
 }
 
 export default function ScanHistory() {
-  // Mock data - in production this would come from an API
-  const scanHistory: ScanHistoryItem[] = [
-    {
-      id: '1',
-      name: 'Organic Cotton T-Shirt',
-      date: '2024-03-15',
-      carbonSaved: 2.5,
-      moneySaved: 250,
-      imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800',
-      ecoPoints: 50
-    },
-    {
-      id: '2',
-      name: 'Recycled Denim Jeans',
-      date: '2024-03-14',
-      carbonSaved: 4.2,
-      moneySaved: 500,
-      imageUrl: 'https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=800',
-      ecoPoints: 75
-    },
-    {
-      id: '3',
-      name: 'Sustainable Wool Sweater',
-      date: '2024-03-13',
-      carbonSaved: 3.8,
-      moneySaved: 600,
-      imageUrl: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=800',
-      ecoPoints: 65
-    }
-  ];
+  const [scanHistory, setScanHistory] = useState<ScanHistoryItem[]>([]);
+  const [totalImpact, setTotalImpact] = useState({
+    carbonSaved: 0,
+    moneySaved: 0,
+    totalPoints: 0,
+  });
 
-  const totalImpact = {
-    carbonSaved: scanHistory.reduce((sum, item) => sum + item.carbonSaved, 0),
-    moneySaved: scanHistory.reduce((sum, item) => sum + item.moneySaved, 0),
-    totalPoints: scanHistory.reduce((sum, item) => sum + item.ecoPoints, 0)
-  };
+  useEffect(() => {
+    const fetchScanHistory = async () => {
+      try {
+        const response = await fetch(`http://localhost:5001/api/history`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch scan history data');
+        }
+        const fetchedData = await response.json(); // Assuming the backend returns an array of objects
+
+        // Process fetched data
+        const processedData = fetchedData.map((item: any, index: number) => ({
+          id: item.id || `scan-${index}`, // Fallback for missing IDs
+          name: `Scanned Item ${index + 1}`, // Placeholder name if not provided
+          date: new Date().toISOString(), // Use the current date if no date is provided
+          carbonSaved: (item.carbonSaved || 0) * 10,
+          moneySaved: (item.carbonSaved || 0) * 100,
+          imageUrl: item.imageUrl || 'https://via.placeholder.com/150', // Fallback for missing image
+          ecoPoints: item.rewardPoints || 0,
+        }));
+
+        setScanHistory(processedData);
+
+        // Calculate total impact
+        const totals = processedData.reduce(
+          (acc: { carbonSaved: any; moneySaved: any; totalPoints: any; }, item: { carbonSaved: any; moneySaved: any; ecoPoints: any; }) => ({
+            carbonSaved: acc.carbonSaved + item.carbonSaved,
+            moneySaved: acc.moneySaved + item.moneySaved,
+            totalPoints: acc.totalPoints + item.ecoPoints,
+          }),
+          { carbonSaved: 0, moneySaved: 0, totalPoints: 0 }
+        );
+
+        setTotalImpact(totals);
+      } catch (error:any) {
+        console.error('Error fetching scan history:', error.message);
+      }
+    };
+
+    fetchScanHistory();
+  }, []);
 
   return (
     <div className="space-y-8">
