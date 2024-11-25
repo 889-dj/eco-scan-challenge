@@ -30,7 +30,7 @@ async function analyzeImage(cloudinaryURL) {
         },
       ],
       model: "llama-3.2-11b-vision-preview",
-      temperature: 0.2,
+      temperature: 0.8,
       max_tokens: 1024,
       top_p: 1,
       stream: false,

@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState } from 'react';
 import { Tag, ArrowRight, Leaf } from 'lucide-react';
+import {Toaster,toast} from 'react-hot-toast';
 
 interface Offer {
   id: number;
@@ -17,7 +19,7 @@ export default function Offers() {
       title: "Eco-friendly Store Discount",
       description: "Get 20% off on sustainable fashion items",
       pointsCost: 500,
-      carbonScore: 0, // Placeholder for dynamic data
+      carbonScore: 20,
       discount: "20% OFF",
     },
     {
@@ -25,7 +27,7 @@ export default function Offers() {
       title: "Recycling Bonus",
       description: "Double points on your next recycled item scan",
       pointsCost: 300,
-      carbonScore: 0, // Placeholder for dynamic data
+      carbonScore: 75,
       discount: "2X POINTS",
     },
     {
@@ -33,7 +35,7 @@ export default function Offers() {
       title: "Premium Brand Voucher",
       description: "₹1000 off on sustainable premium brands",
       pointsCost: 1000,
-      carbonScore: 0, // Placeholder for dynamic data
+      carbonScore: 40, // Placeholder for dynamic data
       discount: "₹1000 OFF",
     },
   ]);
@@ -47,14 +49,15 @@ export default function Offers() {
         }
 
         const fetchedData = await response.json();
+        console.log("fetched data",fetchedData)
 
         // Update offers array with fetched data
-        const updatedOffers = offers.map((offer, index) => {
-          const fetchedOffer = fetchedData[index]; // Assuming the backend returns data in the same order
+        const updatedOffers = offers.map((offer) => {
+          // const fetchedOffer = fetchedData[index];
           return {
             ...offer,
-            carbonScore: fetchedOffer.carbonSaved || offer.carbonScore, // Update carbonScore
-            pointsCost: fetchedOffer.rewardPoints || offer.pointsCost, // Update pointsCost
+            carbonScore: offer.carbonScore, 
+            pointsCost: offer.pointsCost, 
           };
         });
 
@@ -66,6 +69,41 @@ export default function Offers() {
 
     fetchOfferData();
   }, []);
+
+  
+  const redeemOffer = async (offerId: number) => {
+    try {
+      const response = await fetch(`http://localhost:5001/api/offers/redeem`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ offerId }),
+      });
+
+      const data = await response.json();
+      // console.log(data)
+
+      if (response.ok) {
+        toast.success(data.message || 'Offer redeemed successfully!', {
+          position: 'top-right',
+          autoClose: 3000,
+        });
+      } else {
+        toast.error(data.message || 'Failed to redeem offer.', {
+          position: 'top-right',
+          autoClose: 3000,
+        });
+      }
+    } catch (error: any) {
+      toast.error('An error occurred while redeeming the offer.', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
+      console.error('Error redeeming offer:', error.message);
+    }
+  };
+
 
   return (
     <div className="space-y-6">
@@ -106,8 +144,10 @@ export default function Offers() {
                   <span className="text-sm text-gray-500">
                     {offer.pointsCost} points required
                   </span>
-                  <button className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-emerald-700 bg-emerald-100 hover:bg-emerald-200 transition-colors">
+                  <button className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-emerald-700 bg-emerald-100 hover:bg-emerald-200 transition-colors"
+                  onClick={() => redeemOffer(offer.id)}>
                     Redeem
+                    <Toaster/>
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </button>
                 </div>

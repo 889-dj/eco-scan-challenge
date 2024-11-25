@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import { History, TrendingDown, Coins, Award } from 'lucide-react';
 
@@ -26,16 +27,16 @@ export default function ScanHistory() {
         if (!response.ok) {
           throw new Error('Failed to fetch scan history data');
         }
-        const fetchedData = await response.json(); // Assuming the backend returns an array of objects
-
+        const fetchedData = await response.json();
+        console.log(fetchedData)
         // Process fetched data
-        const processedData = fetchedData.map((item: any, index: number) => ({
-          id: item.id || `scan-${index}`, // Fallback for missing IDs
-          name: `Scanned Item ${index + 1}`, // Placeholder name if not provided
-          date: new Date().toISOString(), // Use the current date if no date is provided
+        const processedData = fetchedData.data.map((item: any, index: number) => ({
+          id: item.id || `scan-${index}`, 
+          name: `Scanned Item ${index + 1}`, 
+          date: new Date().toISOString(), 
           carbonSaved: (item.carbonSaved || 0) * 10,
           moneySaved: (item.carbonSaved || 0) * 100,
-          imageUrl: item.imageUrl || 'https://via.placeholder.com/150', // Fallback for missing image
+          imageUrl: item.imageUrl || 'https://via.placeholder.com/150', 
           ecoPoints: item.rewardPoints || 0,
         }));
 
