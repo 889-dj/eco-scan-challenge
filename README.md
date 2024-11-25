@@ -1,7 +1,12 @@
 # eco-scan-challenge
 
-# frontend
+## frontend
 ### stack
 - reactjs 
 - css 
-# backend 
+## backend 
+- mongodb
+- expressjs
+- 
+## working video
+[![alt text](https://img.youtube.com/vi/video-id/0.jpg)](https://www.youtube.com/watch?v=video-id)
