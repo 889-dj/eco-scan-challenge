@@ -46,4 +46,4 @@ flowchart LR
   - offers/rewards
 
 ## working video
-[<img src="https://i.ytimg.com/vi/Hc79sDi3f0U/maxresdefault.jpg" width="50%">](https://www.youtube.com/watch?v=Hc79sDi3f0U "Now in Android: 55")
+https://www.loom.com/share/a8428f073e824f4bb1a992b4842562df?sid=0a7557ae-9a95-4278-b388-b79c623ac235
